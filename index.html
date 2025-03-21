@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyScript File Upload</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script type="module" src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+    <h2>Bestand Uploaden en Scannen</h2>
+    <input type="file" id="fileInput">
+    <button py-click="upload_file">Upload en Scan</button>
+    <pre id="result"></pre>
+
+    <py-script>
+import asyncio
+import json
+from js import document, fetch, FileReader, FormData
+
+async def upload_file():
+    file_input = document.getElementById("fileInput")
+    if len(file_input.files) == 0:
+        document.getElementById("result").innerText = "Selecteer een bestand!"
+        return
+
+    file = file_input.files[0]
+    reader = FileReader()
+    reader.readAsArrayBuffer(file)
+    await asyncio.sleep(1)  # Wacht op lezen van bestand
+
+    url = "http://localhost:8000/upload"
+    form_data = FormData()
+    form_data.append("file", file)
+
+    response = await fetch(url, {"method": "POST", "body": form_data})
+    result = await response.json()
+
+    document.getElementById("result").innerText = json.dumps(result, indent=2)
+    </py-script>
+</body>
+</html>
